@@ -91,6 +91,25 @@ sub vcl_recv {
     /* Non-RFC2616 or CONNECT which is weird. */
     return (pipe);
   }
+  
+  #Drupal 7 Begin
+  # Do not cache these paths.
+  if (req.url ~ "^/status.php$" ||
+    req.url ~ "^/update.php$" ||
+    req.url ~ "^/admin/build/features" ||
+    req.url ~ "^/info/.$" ||
+    req.url ~ "^/flag/.$" ||
+    req.url ~ "^./ajax/.$" ||
+    req.url ~ "^./ahah/.$") {
+    return (pass);
+  }
+ 
+  # Pipe these paths directly to Apache for streaming.
+  if (req.url ~ "^/admin/content/backup_migrate/export") {
+    return (pipe);
+  }
+  
+  #Drupal 7 End
 
   # Implementing websocket support (https://www.varnish-cache.org/docs/4.0/users-guide/vcl-example-websockets.html)
   if (req.http.Upgrade ~ "(?i)websocket") {
